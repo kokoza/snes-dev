@@ -25,23 +25,23 @@ start:
 	lda #$00
 	sta CGDATA
 
-	; Color 1 = red
+	; Color 1 = orange*
 	lda #$0e   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = all the red bits
 	lda #$10   ;palette high byte -bbbbbgg
 	sta CGDATA ; store zero for high byte
 
-	; Color 2 = green
-	lda #$0b   ;palette low byte gggrrrrr
+	; Color 2 = yellow* rgb = 25 23 4 = R11001G10111B00100
+	lda #%11111001   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = all the red bits
-	lda #$02   ;palette high byte -bbbbbgg
+	lda #%0010010   ;palette high byte -bbbbbgg
 	sta CGDATA ; store zero for high byte
 
 
-	; Color 3 = blue
-	lda #$00   ;palette low byte gggrrrrr
+	; Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
+	lda #$B3   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = all the red bits
-	lda #$d1   ;palette high byte -bbbbbgg
+	lda #$7f   ;palette high byte -bbbbbgg
 	sta CGDATA ; store zero for high byte
 
 	; Set Graphics Mode 0, 8x8 tiles
@@ -62,7 +62,7 @@ start:
 	ldy #%01000010
 @bgset_loop:
     stz VMDATAL
-    sty VMDATAH
+    stz VMDATAH
     inx
     cpx #1024
     bne @bgset_loop
