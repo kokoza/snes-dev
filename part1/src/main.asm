@@ -59,7 +59,7 @@ start:
 	ldx #VRAM_BG1
 	stx VMADDL
 	ldx #0
-	ldy #%00000000
+	ldy #%10000010
 @bgset_loop:
     stz VMDATAL
     sty VMDATAH
