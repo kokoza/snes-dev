@@ -59,15 +59,13 @@ start:
 	ldx #VRAM_BG1
 	stx VMADDL
 	ldx #0
+	ldy #%00000000
 @bgset_loop:
-	lda bgset,x
-	sta VMDATAL
-	inx
-	lda bgset,x
-	sta VMDATAH
-	inx
-	cpx #(bgset_end - bgset)
-	bne @bgset_loop
+    stz VMDATAL
+    sty VMDATAH
+    inx
+    cpx #1024
+    bne @bgset_loop
 
 
 	; Load character data into VRAM
