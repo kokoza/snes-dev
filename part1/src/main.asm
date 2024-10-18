@@ -93,6 +93,20 @@ start:
 	sta VMDATAL
 	stz VMDATAH
 
+	; Write a tile to position (3, 3)
+	ldx #(VRAM_BG1 + ((TILE_Y+2) * 32) + TILE_X + 2)
+	stx VMADDL
+	lda #$02 ; tile number
+	sta VMDATAL
+	stz VMDATAH
+
+	; Write a tile to position (8, 3)
+	ldx #(VRAM_BG1 + ((TILE_Y+5) * 32) + TILE_X + 12)
+	stx VMADDL
+	lda #$03 ; tile number
+	sta VMDATAL
+	stz VMDATAH
+
 	; Show BG1
 	lda #%00000001
 	sta TM
