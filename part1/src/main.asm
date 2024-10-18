@@ -6,6 +6,9 @@
 
 .include "header.asm"
 
+.segment "ZEROPAGE"
+nmi_count: .res 2
+
 .segment "CODE"
 
 VRAM_CHARS = $0000
@@ -116,10 +119,16 @@ start:
 	lda #$0f
 	sta INIDISP
 
-	lda #%00000001
+	lda #%10000001
 	sta NMITIMEN
 
 	mainloop:
+		lda nmi_count
+	@nmi_check:
+		wai
+		cmp nmi_count
+		beq @nmi_check
+
 		lda JOY1H ; BYsS UDLR
 		bit #%00000100 ; Down button 
 		beq @down_not_pressed
@@ -170,20 +179,11 @@ start:
 			stz VMDATAH
 		@start_not_pressed:
 
-		lda JOY1L ; AXlr 0000
-		bit #%10000000 ; A button 
-		beq @a_not_pressed
-			ldx #(VRAM_BG1 + (1 * 32) + 1)
-			stx VMADDL
-			lda #$00 ; tile number
-			sta VMDATAL
-			stz VMDATAH
-		@a_not_pressed:
-
 	bra mainloop
 
 nmi:
 	bit RDNMI
+	inc nmi_count
 _rti:
 	rti
 
