@@ -95,18 +95,18 @@ start:
 	;stz VMDATAH
 
 	; Write a tile to position (3, 3)
-	ldx #(VRAM_BG1 + ((TILE_Y+2) * 32) + TILE_X + 2)
-	stx VMADDL
-	lda #$02 ; tile number
-	sta VMDATAL
-	stz VMDATAH
+	;ldx #(VRAM_BG1 + ((TILE_Y+2) * 32) + TILE_X + 2)
+	;stx VMADDL
+	;lda #$02 ; tile number
+	;sta VMDATAL
+	;stz VMDATAH
 
 	; Write a tile to position (8, 3)
-	ldx #(VRAM_BG1 + ((TILE_Y+5) * 32) + TILE_X + 12)
-	stx VMADDL
-	lda #$03 ; tile number
-	sta VMDATAL
-	stz VMDATAH
+	;ldx #(VRAM_BG1 + ((TILE_Y+5) * 32) + TILE_X + 12)
+	;stx VMADDL
+	;lda #$03 ; tile number
+	;sta VMDATAL
+	;stz VMDATAH
 
 	; Show BG1
 	lda #%00000001
@@ -120,8 +120,8 @@ start:
 	sta NMITIMEN
 
 	mainloop:
-		lda JOY1H
-		bit #%00000100 ; Down button
+		lda JOY1H ; BYsS UDLR
+		bit #%00000100 ; Down button 
 		beq @down_not_pressed
 			ldx #(VRAM_BG1 + (1 * 32) + 1)
 			stx VMADDL
@@ -129,6 +129,56 @@ start:
 			sta VMDATAL
 			stz VMDATAH
 		@down_not_pressed:
+
+		lda JOY1H ; BYsS UDLR
+		bit #%00001000 ; UP button 
+		beq @up_not_pressed
+			ldx #(VRAM_BG1 + (3 * 32) + 3)
+			stx VMADDL
+			lda #$02 ; tile number
+			sta VMDATAL
+			stz VMDATAH
+		@up_not_pressed:
+
+		lda JOY1H ; BYsS UDLR
+		bit #%00000001 ; RIGHT button 
+		beq @right_not_pressed
+			ldx #(VRAM_BG1 + (5 * 32) + 12)
+			stx VMADDL
+			lda #$03 ; tile number
+			sta VMDATAL
+			stz VMDATAH
+		@right_not_pressed:
+
+		lda JOY1H ; BYsS UDLR
+		bit #%00000010 ; LEFT button 
+		beq @left_not_pressed
+			ldx #(VRAM_BG1 + (5 * 32) + 12)
+			stx VMADDL
+			lda #$00 ; tile number
+			sta VMDATAL
+			stz VMDATAH
+		@left_not_pressed:
+
+		lda JOY1H ; BYsS UDLR
+		bit #%00010000 ; START button 
+		beq @start_not_pressed
+			ldx #(VRAM_BG1 + (3 * 32) + 3)
+			stx VMADDL
+			lda #$00 ; tile number
+			sta VMDATAL
+			stz VMDATAH
+		@start_not_pressed:
+
+		lda JOY1L ; AXlr 0000
+		bit #%10000000 ; A button 
+		beq @a_not_pressed
+			ldx #(VRAM_BG1 + (1 * 32) + 1)
+			stx VMADDL
+			lda #$00 ; tile number
+			sta VMDATAL
+			stz VMDATAH
+		@a_not_pressed:
 
 	bra mainloop
 
