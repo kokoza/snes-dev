@@ -26,23 +26,24 @@ start:
 	sta CGDATA
 
 	; Color 1 = orange*
-	lda #$0e   ;palette low byte gggrrrrr
-	sta CGDATA ; 1f = all the red bits
-	lda #$10   ;palette high byte -bbbbbgg
-	sta CGDATA ; store zero for high byte
+	lda #$0e   ; palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$10   ; palette high byte -bbbbbgg
+	sta CGDATA ; 
 
 	; Color 2 = yellow* rgb = 25 23 4 = R11001G10111B00100
+	;                                   RrrrrrGgggggBbbbbb
 	lda #%11111001   ;palette low byte gggrrrrr
-	sta CGDATA ; 1f = all the red bits
+	sta CGDATA ; 1f = 
 	lda #%0010010   ;palette high byte -bbbbbgg
-	sta CGDATA ; store zero for high byte
+	sta CGDATA ; 
 
 
 	; Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
 	lda #$B3   ;palette low byte gggrrrrr
-	sta CGDATA ; 1f = all the red bits
+	sta CGDATA ; 
 	lda #$7f   ;palette high byte -bbbbbgg
-	sta CGDATA ; store zero for high byte
+	sta CGDATA ; 
 
 	; Set Graphics Mode 0, 8x8 tiles
 	stz BGMODE
@@ -87,11 +88,11 @@ start:
 	; Write a tile to position (1, 1)
 	TILE_X = 1
 	TILE_Y = 1
-	ldx #(VRAM_BG1 + (TILE_Y * 32) + TILE_X)
-	stx VMADDL
-	lda #$01 ; tile number
-	sta VMDATAL
-	stz VMDATAH
+	;ldx #(VRAM_BG1 + (TILE_Y * 32) + TILE_X)
+	;stx VMADDL
+	;lda #$01 ; tile number
+	;sta VMDATAL
+	;stz VMDATAH
 
 	; Write a tile to position (3, 3)
 	ldx #(VRAM_BG1 + ((TILE_Y+2) * 32) + TILE_X + 2)
@@ -115,8 +116,21 @@ start:
 	lda #$0f
 	sta INIDISP
 
-busywait:
-	bra busywait
+	lda #%00000001
+	sta NMITIMEN
+
+	mainloop:
+		lda JOY1H
+		bit #%00000100 ; Down button
+		beq @down_not_pressed
+			ldx #(VRAM_BG1 + (1 * 32) + 1)
+			stx VMADDL
+			lda #$01 ; tile number
+			sta VMDATAL
+			stz VMDATAH
+		@down_not_pressed:
+
+	bra mainloop
 
 nmi:
 	bit RDNMI
