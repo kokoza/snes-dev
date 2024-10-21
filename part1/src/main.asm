@@ -8,6 +8,8 @@
 
 .segment "ZEROPAGE"
 nmi_count: .res 2
+x_pos: .res 2
+y_pos: .res 2
 
 .segment "CODE"
 
@@ -89,8 +91,8 @@ start:
 	bne @charset_loop
 
 	; Write a tile to position (1, 1)
-	TILE_X = 1
-	TILE_Y = 1
+	;TILE_X = 1
+	;TILE_Y = 1
 	;ldx #(VRAM_BG1 + (TILE_Y * 32) + TILE_X)
 	;stx VMADDL
 	;lda #$01 ; tile number
@@ -128,56 +130,57 @@ start:
 		wai
 		cmp nmi_count
 		beq @nmi_check
-
+		
+		; START
+		stz y_pos
 		lda JOY1H ; BYsS UDLR
-		bit #%00000100 ; Down button 
-		beq @down_not_pressed
-			ldx #(VRAM_BG1 + (1 * 32) + 1)
+		bit #%00010000 ; START button 
+		beq @start_not_pressed
+			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
 			lda #$01 ; tile number
 			sta VMDATAL
 			stz VMDATAH
-		@down_not_pressed:
+		@start_not_pressed:
 
+		; DOWN
 		lda JOY1H ; BYsS UDLR
-		bit #%00001000 ; UP button 
-		beq @up_not_pressed
-			ldx #(VRAM_BG1 + (3 * 32) + 3)
+		bit #%00000100 ; DOWN
+		beq @down_not_pressed
+			ldy #3
+			sty y_pos
+			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
+			stx x_pos
 			stx VMADDL
 			lda #$02 ; tile number
 			sta VMDATAL
 			stz VMDATAH
-		@up_not_pressed:
-
+		@down_not_pressed:
+		
+		; RIGHT
 		lda JOY1H ; BYsS UDLR
-		bit #%00000001 ; RIGHT button 
+		bit #%00000001 ; RIGHT
 		beq @right_not_pressed
-			ldx #(VRAM_BG1 + (5 * 32) + 12)
+			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
+			stx y_pos
 			stx VMADDL
 			lda #$03 ; tile number
 			sta VMDATAL
 			stz VMDATAH
 		@right_not_pressed:
 
+		; UP
 		lda JOY1H ; BYsS UDLR
-		bit #%00000010 ; LEFT button 
-		beq @left_not_pressed
-			ldx #(VRAM_BG1 + (5 * 32) + 12)
+		bit #%00001000 ; UP
+		beq @up_not_pressed
+			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos + y_pos)
+			stx x_pos
+			stx x_pos
 			stx VMADDL
-			lda #$00 ; tile number
+			lda #$01 ; tile number
 			sta VMDATAL
 			stz VMDATAH
-		@left_not_pressed:
-
-		lda JOY1H ; BYsS UDLR
-		bit #%00010000 ; START button 
-		beq @start_not_pressed
-			ldx #(VRAM_BG1 + (3 * 32) + 3)
-			stx VMADDL
-			lda #$00 ; tile number
-			sta VMDATAL
-			stz VMDATAH
-		@start_not_pressed:
+		@up_not_pressed:
 
 	bra mainloop
 
