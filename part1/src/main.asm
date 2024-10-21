@@ -8,8 +8,8 @@
 
 .segment "ZEROPAGE"
 nmi_count: .res 2
-x_pos: .res 2
-y_pos: .res 2
+x_pos: .res 1
+y_pos: .res 1
 
 .segment "CODE"
 
@@ -66,6 +66,7 @@ start:
 	stx VMADDL
 	ldx #0
 	ldy #%01000010
+
 @bgset_loop:
     stz VMDATAL
     stz VMDATAH
@@ -79,39 +80,18 @@ start:
 	sta VMAIN
 	ldx #VRAM_CHARS
 	stx VMADDL
-	ldx #0
-@charset_loop:
-	lda charset,x
-	sta VMDATAL
-	inx
-	lda charset,x
-	sta VMDATAH
-	inx
-	cpx #(charset_end - charset)
-	bne @charset_loop
-
-	; Write a tile to position (1, 1)
-	;TILE_X = 1
-	;TILE_Y = 1
-	;ldx #(VRAM_BG1 + (TILE_Y * 32) + TILE_X)
-	;stx VMADDL
-	;lda #$01 ; tile number
-	;sta VMDATAL
-	;stz VMDATAH
-
-	; Write a tile to position (3, 3)
-	;ldx #(VRAM_BG1 + ((TILE_Y+2) * 32) + TILE_X + 2)
-	;stx VMADDL
-	;lda #$02 ; tile number
-	;sta VMDATAL
-	;stz VMDATAH
-
-	; Write a tile to position (8, 3)
-	;ldx #(VRAM_BG1 + ((TILE_Y+5) * 32) + TILE_X + 12)
-	;stx VMADDL
-	;lda #$03 ; tile number
-	;sta VMDATAL
-	;stz VMDATAH
+	lda #%00000001
+	sta DMAP0       ; 4300 DMA Control Register https://snes.nesdev.org/wiki/DMA_registers#DMAPn
+	lda #<VMDATAL
+	sta BBAD0       ; 4301 DMA Destination Register https://snes.nesdev.org/wiki/DMA_registers#BBADn
+	ldx #.loword(charset)
+	stx A1T0L       ; 4302 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
+	lda #^charset
+	sta A1B0        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
+	ldx #(charset_end - charset)
+	stx DAS0L       ; 4305 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
+	lda #1
+	sta MDMAEN      ; 420B DMA Enable Register
 
 	; Show BG1
 	lda #%00000001
@@ -132,10 +112,11 @@ start:
 		beq @nmi_check
 		
 		; START
-		stz y_pos
 		lda JOY1H ; BYsS UDLR
 		bit #%00010000 ; START button 
 		beq @start_not_pressed
+			stz x_pos
+			stz y_pos
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
 			lda #$01 ; tile number
@@ -147,10 +128,13 @@ start:
 		lda JOY1H ; BYsS UDLR
 		bit #%00000100 ; DOWN
 		beq @down_not_pressed
-			ldy #3
-			sty y_pos
+			ldy x_pos
+			@xpos_check:
+				cpy x_pos
+				iny
+				sty x_pos	
+
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			stx x_pos
 			stx VMADDL
 			lda #$02 ; tile number
 			sta VMDATAL
@@ -161,8 +145,11 @@ start:
 		lda JOY1H ; BYsS UDLR
 		bit #%00000001 ; RIGHT
 		beq @right_not_pressed
+			ldy y_pos
+			iny
+			sty y_pos
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			stx y_pos
+			inx
 			stx VMADDL
 			lda #$03 ; tile number
 			sta VMDATAL
@@ -173,9 +160,10 @@ start:
 		lda JOY1H ; BYsS UDLR
 		bit #%00001000 ; UP
 		beq @up_not_pressed
-			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos + y_pos)
-			stx x_pos
-			stx x_pos
+			ldy x_pos
+			dey
+			sty x_pos
+			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
 			lda #$01 ; tile number
 			sta VMDATAL
