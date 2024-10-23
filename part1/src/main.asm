@@ -50,48 +50,80 @@ start:
 	lda #$7f   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
+	; Fill remaining pallette with black
+	.repeat 252
+		lda #$00
+		sta CGDATA
+		lda #$00
+		sta CGDATA
+	.endrepeat
+
 	; Set Graphics Mode 0, 8x8 tiles
 	stz BGMODE
 
 	; Set BG1 and tile map and character data
 	lda #>VRAM_BG1
-	sta BG1SC
+	sta BG1SC     ; 2107
 	lda #VRAM_CHARS
-	sta BG12NBA
+	sta BG12NBA   ; 210B
 
+	;;;;;;;;; Set tilemap as 0s ;;;;;;;;;;
 	; Set tilemap as 0s
 	lda #$80
-	sta VMAIN
+	sta VMAIN     ; $2115
 	ldx #VRAM_BG1
-	stx VMADDL
-	ldx #0
-	ldy #%01000010
+	stx VMADDL    ; $2116
 
-@bgset_loop:
-    stz VMDATAL
-    stz VMDATAH
-    inx
-    cpx #1024
-    bne @bgset_loop
+	; Write from A to B (D=0) for VRAM (PPP=001) with Fixed Address mode (A=1)
+	lda #%00000001  ; DIxA APPP
+	sta DMAP1       ; 43n0 DMA Control Register
 
+	; Write to B-Bus 2118
+	lda #<VMDATAL   ; 2118
+	sta BBAD1       ; 43n1 DMA Destination Register
 
-	; Load character data into VRAM
+	ldx #.loword(black_bg)
+	stx A1T1L       ; 43n2 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
+	lda #^black_bg
+	sta A1B1        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
+	;bg_hi = %00000011 ; Background color -bbbbbgg
+	;lda #(bg_hi)
+	;sta A1T1H        ; 43n4 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
+	; Define size of transfer
+	ldx #(black_bg_end - black_bg)
+	stx DAS1L       ; 43n5 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
+
+;@bgset_loop:
+;    stz VMDATAL ; $2118
+;    stz VMDATAH ; $2119
+;    inx
+;    cpx #1024
+;    bne @bgset_loop
+
+	; Load character data into VRAM - DMA Channel 0
 	lda #$80
 	sta VMAIN
 	ldx #VRAM_CHARS
 	stx VMADDL
-	lda #%00000001
+
+	; Set transfer pattern (PPP) to 001 for VRAM and D[irection] to 0 (A to B)
+	lda #%00000001  ; DIxA APPP
 	sta DMAP0       ; 4300 DMA Control Register https://snes.nesdev.org/wiki/DMA_registers#DMAPn
-	lda #<VMDATAL
+
+	; Select B-Bus hardware register to read or write from, in the $2100-$21ff range
+	lda #<VMDATAL   ; 2118
 	sta BBAD0       ; 4301 DMA Destination Register https://snes.nesdev.org/wiki/DMA_registers#BBADn
+
 	ldx #.loword(charset)
 	stx A1T0L       ; 4302 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
 	lda #^charset
 	sta A1B0        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
 	ldx #(charset_end - charset)
 	stx DAS0L       ; 4305 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
-	lda #1
-	sta MDMAEN      ; 420B DMA Enable Register
+	
+	; Initiate transfer - will be done below
+	lda #%00000011  ; Initiate DMA on Channel 0 and 1
+	sta MDMAEN      ; 420B DMA Enable Register https://snes.nesdev.org/wiki/DMA_registers#MDMAEN
 
 	; Show BG1
 	lda #%00000001
@@ -119,7 +151,7 @@ start:
 			stz y_pos
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
-			lda #$01 ; tile number
+			lda #$04 ; tile number
 			sta VMDATAL
 			stz VMDATAH
 		@start_not_pressed:
@@ -128,12 +160,6 @@ start:
 		lda JOY1H ; BYsS UDLR
 		bit #%00000100 ; DOWN
 		beq @down_not_pressed
-			ldy x_pos
-			@xpos_check:
-				cpy x_pos
-				iny
-				sty x_pos	
-
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
 			lda #$02 ; tile number
@@ -145,11 +171,7 @@ start:
 		lda JOY1H ; BYsS UDLR
 		bit #%00000001 ; RIGHT
 		beq @right_not_pressed
-			ldy y_pos
-			iny
-			sty y_pos
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			inx
 			stx VMADDL
 			lda #$03 ; tile number
 			sta VMDATAL
@@ -160,9 +182,6 @@ start:
 		lda JOY1H ; BYsS UDLR
 		bit #%00001000 ; UP
 		beq @up_not_pressed
-			ldy x_pos
-			dey
-			sty x_pos
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
 			lda #$01 ; tile number
