@@ -28,107 +28,107 @@ start:
 ;$77BE, $62D9, $5254, $316C, $6F3B, $41F0, $0842, $18E7, $639E, $575D, $2E9C, $4EDA, $7FFF, $7C1F, $7C1F, $7C1F
 
 	; Color 00
-	lda #$77
-	sta CGDATA
 	lda #$BE
+	sta CGDATA
+	lda #$77
 	sta CGDATA
 
 	; Color 01
-	lda #$62   ; palette low byte gggrrrrr
+	lda #$D9   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$D9   ; palette high byte -bbbbbgg
+	lda #$62   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 02
-	lda #$52   ;palette low byte gggrrrrr
+	lda #$54   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = 
-	lda #$54   ;palette high byte -bbbbbgg
+	lda #$52   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 
 	; Color 03
-	lda #$31   ;palette low byte gggrrrrr
+	lda #$6C   ;palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$6C   ;palette high byte -bbbbbgg
+	lda #$31   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 04
-	lda #$6F
-	sta CGDATA
 	lda #$3B
+	sta CGDATA
+	lda #$6F
 	sta CGDATA
 
 	; Color 05
-	lda #$41   ; palette low byte gggrrrrr
+	lda #$F0   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$F0   ; palette high byte -bbbbbgg
+	lda #$41   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 06
-	lda #$08   ;palette low byte gggrrrrr
+	lda #$42   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = 
-	lda #$42   ;palette high byte -bbbbbgg
+	lda #$08   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 
 	; Color 07
-	lda #$18   ;palette low byte gggrrrrr
+	lda #$E7   ;palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$E7   ;palette high byte -bbbbbgg
+	lda #$18   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 08
-	lda #$63
-	sta CGDATA
 	lda #$9E
+	sta CGDATA
+	lda #$63
 	sta CGDATA
 
 	; Color 09
-	lda #$57   ; palette low byte gggrrrrr
+	lda #$5D   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$5D   ; palette high byte -bbbbbgg
+	lda #$57   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 0A
-	lda #$2E   ;palette low byte gggrrrrr
+	lda #$9C   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = 
-	lda #$9C   ;palette high byte -bbbbbgg
+	lda #$2E   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 0B
-	lda #$4E   ;palette low byte gggrrrrr
+	lda #$DA   ;palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$DA   ;palette high byte -bbbbbgg
+	lda #$4E   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 0C
-	lda #$7F
-	sta CGDATA
 	lda #$FF
+	sta CGDATA
+	lda #$7F
 	sta CGDATA
 
 	; Color 0D 
-	lda #$7C   ; palette low byte gggrrrrr
+	lda #$1F   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$1F   ; palette high byte -bbbbbgg
+	lda #$7C   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 	; Color 0E 
-	lda #$7C   ; palette low byte gggrrrrr
+	lda #$1F   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$1F   ; palette high byte -bbbbbgg
+	lda #$7C   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 
 	; Color 0F
-	lda #$7C   ; palette low byte gggrrrrr
+	lda #$1F   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$1F   ; palette high byte -bbbbbgg
+	lda #$7C   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 
 	; Fill remaining pallette with black
-	.repeat 239
+	.repeat 240
 		lda #$00
 		sta CGDATA
 		lda #$00
