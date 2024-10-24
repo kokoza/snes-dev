@@ -23,32 +23,109 @@ start:
 
 	; set color address to 0
 	stz CGADD
-	
-	; Color 0 = black
-	lda #$00
+
+; Awasu #8
+;$77BE, $62D9, $5254, $316C, $6F3B, $41F0, $0842, $18E7, $639E, $575D, $2E9C, $4EDA, $7FFF, $7C1F, $7C1F, $7C1F
+
+	; Color 00
+	lda #$77
 	sta CGDATA
-	lda #$00
+	lda #$BE
 	sta CGDATA
 
-	; Color 1 = orange*
-	lda #$0e   ; palette low byte gggrrrrr
+	; Color 01
+	lda #$62   ; palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$10   ; palette high byte -bbbbbgg
+	lda #$D9   ; palette high byte -bbbbbgg
 	sta CGDATA ; 
 
-	; Color 2 = yellow* rgb = 25 23 4 = R11001G10111B00100
-	;                                   RrrrrrGgggggBbbbbb
-	lda #%11111001   ;palette low byte gggrrrrr
+	; Color 02
+	lda #$52   ;palette low byte gggrrrrr
 	sta CGDATA ; 1f = 
-	lda #%0010010   ;palette high byte -bbbbbgg
+	lda #$54   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
 
-	; Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
-	lda #$B3   ;palette low byte gggrrrrr
+	; Color 03
+	lda #$31   ;palette low byte gggrrrrr
 	sta CGDATA ; 
-	lda #$7f   ;palette high byte -bbbbbgg
+	lda #$6C   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
+
+	; Color 04
+	lda #$6F
+	sta CGDATA
+	lda #$3B
+	sta CGDATA
+
+	; Color 05
+	lda #$41   ; palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$F0   ; palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+	; Color 06
+	lda #$08   ;palette low byte gggrrrrr
+	sta CGDATA ; 1f = 
+	lda #$42   ;palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+
+	; Color 07
+	lda #$18   ;palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$E7   ;palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+	; Color 08
+	lda #$63
+	sta CGDATA
+	lda #$9E
+	sta CGDATA
+
+	; Color 09
+	lda #$57   ; palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$5D   ; palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+	; Color 0A
+	lda #$2E   ;palette low byte gggrrrrr
+	sta CGDATA ; 1f = 
+	lda #$9C   ;palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+	; Color 0B
+	lda #$4E   ;palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$DA   ;palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+	; Color 0C
+	lda #$7F
+	sta CGDATA
+	lda #$FF
+	sta CGDATA
+
+	; Color 0D 
+	lda #$7C   ; palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$1F   ; palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+	; Color 0E 
+	lda #$7C   ; palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$1F   ; palette high byte -bbbbbgg
+	sta CGDATA ; 
+
+
+	; Color 0F
+	lda #$7C   ; palette low byte gggrrrrr
+	sta CGDATA ; 
+	lda #$1F   ; palette high byte -bbbbbgg
+	sta CGDATA ; 
+
 
 	; Fill remaining pallette with black
 	.repeat 252
@@ -58,8 +135,9 @@ start:
 		sta CGDATA
 	.endrepeat
 
-	; Set Graphics Mode 0, 8x8 tiles
-	stz BGMODE
+	; Set Graphics Mode 1, 8x8 tiles
+	lda #%00000001
+	sta BGMODE
 
 	; Set BG1 and tile map and character data
 	lda #>VRAM_BG1
