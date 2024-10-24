@@ -1,30 +1,24 @@
-black_bg:
-        .repeat 32*31
-            .byte   %11111111
-            .byte   %11111111
-
-            .byte   %00000000
-            .byte   %00000000
-
-            .byte   %00000000
-            .byte   %00000000
-
-            .byte   %00000000
-            .byte   %11110000
-
-            .byte   %11110000
-            .byte   %00000000
-
-            .byte   %00000000
-            .byte   %11110000
-
-            .byte   %00000000
-            .byte   %00000000
-
+bg_tiles:
+        .repeat 64*64-56
             .byte   %00000000
             .byte   %00000000
         .endrepeat
-black_bg_end:
+        .repeat 32*31
+            .byte   %00000101
+            .byte   %00000000
+        .endrepeat
+        .repeat 32
+            .byte   %00000100
+            .byte   %00000000
+        .endrepeat
+bg_tiles_end:
+
+; VHPC CCTT   TTTT TTTT
+; |||| ||||   |||| ||||
+; |||| ||++---++++-++++- Tile index
+; |||+-++--------------- Palette selection
+; ||+------------------- Priority
+; ++-------------------- Flip vertical (V) or horizontal (H)
 
 charset:
 
@@ -82,7 +76,7 @@ charset:
         .byte   %01101100 ; row 7, color 0
         .byte   %00000000 ; row 7, color 1
 
-    ; tile 0x02
+    ; tile 0x03
         .byte   %00000000 ; row 0, color 0
         .byte   %00000000 ; row 0, color 1
         .byte   %00111100 ; row 1, color 0
@@ -99,5 +93,78 @@ charset:
         .byte   %00100100 ; row 6, color 1
         .byte   %01101100 ; row 7, color 0
         .byte   %01101100 ; row 7, color 1
+
+    ; tile 0x04
+        .byte   %00000000 ; row 0, color 0
+        .byte   %11111111 ; row 0, color 1
+        .byte   %00000000 ; row 1, color 0
+        .byte   %11111111 ; row 1, color 1
+        .byte   %00000000 ; row 2, color 0
+        .byte   %11111111 ; row 2, color 1
+        .byte   %00000000 ; row 3, color 0
+        .byte   %11111111 ; row 3, color 1
+        .byte   %00000000 ; row 4, color 0
+        .byte   %11111111 ; row 4, color 1
+        .byte   %00000000 ; row 5, color 0
+        .byte   %11111111 ; row 5, color 1
+        .byte   %00000000 ; row 6, color 0
+        .byte   %11111111 ; row 6, color 1
+        .byte   %00000000 ; row 7, color 0
+        .byte   %11111111 ; row 7, color 1
+
+    ; tile 0x05
+        .byte   %11111111 ; row 0, color 0
+        .byte   %11111111 ; row 0, color 1
+        .byte   %11111111 ; row 1, color 0
+        .byte   %11111111 ; row 1, color 1
+        .byte   %11111111 ; row 2, color 0
+        .byte   %11111111 ; row 2, color 1
+        .byte   %11111111 ; row 3, color 0
+        .byte   %11111111 ; row 3, color 1
+        .byte   %11111111 ; row 4, color 0
+        .byte   %11111111 ; row 4, color 1
+        .byte   %11111111 ; row 5, color 0
+        .byte   %11111111 ; row 5, color 1
+        .byte   %11111111 ; row 6, color 0
+        .byte   %11111111 ; row 6, color 1
+        .byte   %11111111 ; row 7, color 0
+        .byte   %11111111 ; row 7, color 1
+
+    ; tile 0x06
+        .byte   %11111111 ; row 0, color 0
+        .byte   %00000000 ; row 0, color 1
+        .byte   %11111111 ; row 1, color 0
+        .byte   %00000000 ; row 1, color 1
+        .byte   %11111111 ; row 2, color 0
+        .byte   %00000000 ; row 2, color 1
+        .byte   %11111111 ; row 3, color 0
+        .byte   %00000000 ; row 3, color 1
+        .byte   %11111111 ; row 4, color 0
+        .byte   %00000000 ; row 4, color 1
+        .byte   %11111111 ; row 5, color 0
+        .byte   %00000000 ; row 5, color 1
+        .byte   %11111111 ; row 6, color 0
+        .byte   %00000000 ; row 6, color 1
+        .byte   %11111111 ; row 7, color 0
+        .byte   %00000000 ; row 7, color 1
+
+    ;.repeat 24
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;    .byte   %00000000
+    ;.endrepeat
 
 charset_end:

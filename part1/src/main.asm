@@ -50,11 +50,11 @@ start:
 	lda #$7f   ;palette high byte -bbbbbgg
 	sta CGDATA ; 
 
-	; Fill remaining pallette with black
+	; Fill remaining pallette with BRIGHT YELLOW GREEN
 	.repeat 252
-		lda #$00
+		lda #%11101111 ;palette low byte gggrrrrr
 		sta CGDATA
-		lda #$00
+		lda #%00000011
 		sta CGDATA
 	.endrepeat
 
@@ -67,7 +67,7 @@ start:
 	lda #VRAM_CHARS
 	sta BG12NBA   ; 210B
 
-	;;;;;;;;; Set tilemap as 0s ;;;;;;;;;;
+	;;;;;;;; Set tilemap as 0s ;;;;;;;;
 	; Set tilemap as 0s
 	lda #$80
 	sta VMAIN     ; $2115
@@ -82,25 +82,16 @@ start:
 	lda #<VMDATAL   ; 2118
 	sta BBAD1       ; 43n1 DMA Destination Register
 
-	ldx #.loword(black_bg)
+	ldx #.loword(bg_tiles)
 	stx A1T1L       ; 43n2 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
-	lda #^black_bg
+	lda #^bg_tiles
 	sta A1B1        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
-	;bg_hi = %00000011 ; Background color -bbbbbgg
-	;lda #(bg_hi)
-	;sta A1T1H        ; 43n4 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
 	; Define size of transfer
-	ldx #(black_bg_end - black_bg)
+	ldx #(bg_tiles_end - bg_tiles)
 	stx DAS1L       ; 43n5 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
 
-;@bgset_loop:
-;    stz VMDATAL ; $2118
-;    stz VMDATAH ; $2119
-;    inx
-;    cpx #1024
-;    bne @bgset_loop
 
-	; Load character data into VRAM - DMA Channel 0
+	;;;;;;;; Load character data into VRAM - DMA Channel 0 ;;;;;;;;
 	lda #$80
 	sta VMAIN
 	ldx #VRAM_CHARS
@@ -144,7 +135,7 @@ start:
 		beq @nmi_check
 		
 		; START
-		lda JOY1H ; BYsS UDLR
+		lda JOY1H ; $4219 BYsS UDLR
 		bit #%00010000 ; START button 
 		beq @start_not_pressed
 			stz x_pos
@@ -157,7 +148,7 @@ start:
 		@start_not_pressed:
 
 		; DOWN
-		lda JOY1H ; BYsS UDLR
+		lda JOY1H ; $4219 BYsS UDLR
 		bit #%00000100 ; DOWN
 		beq @down_not_pressed
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
@@ -168,7 +159,7 @@ start:
 		@down_not_pressed:
 		
 		; RIGHT
-		lda JOY1H ; BYsS UDLR
+		lda JOY1H ; $4219 BYsS UDLR
 		bit #%00000001 ; RIGHT
 		beq @right_not_pressed
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
@@ -179,7 +170,7 @@ start:
 		@right_not_pressed:
 
 		; UP
-		lda JOY1H ; BYsS UDLR
+		lda JOY1H ; $4219 BYsS UDLR
 		bit #%00001000 ; UP
 		beq @up_not_pressed
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
