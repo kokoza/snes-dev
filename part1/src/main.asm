@@ -128,7 +128,7 @@ start:
 
 
 	; Fill remaining pallette with black
-	.repeat 252
+	.repeat 239
 		lda #$00
 		sta CGDATA
 		lda #$00
