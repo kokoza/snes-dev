@@ -160,15 +160,12 @@ start:
 	lda #<VMDATAL   ; 2118
 	sta BBAD1       ; 43n1 DMA Destination Register
 
-	ldx #.loword(black_bg)
+	ldx #.loword(bgset)
 	stx A1T1L       ; 43n2 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
-	lda #^black_bg
+	lda #^bgset
 	sta A1B1        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
-	;bg_hi = %00000011 ; Background color -bbbbbgg
-	;lda #(bg_hi)
-	;sta A1T1H        ; 43n4 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
 	; Define size of transfer
-	ldx #(black_bg_end - black_bg)
+	ldx #(bgset_end - bgset)
 	stx DAS1L       ; 43n5 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
 
 	; Load character data into VRAM - DMA Channel 0
