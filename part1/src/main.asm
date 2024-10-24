@@ -146,7 +146,7 @@ start:
 	sta BG12NBA   ; 210B
 
 	;;;;;;;;; Set tilemap as 0s ;;;;;;;;;;
-	; Set tilemap as 0s
+	; Define tile map
 	lda #$80
 	sta VMAIN     ; $2115
 	ldx #VRAM_BG1
@@ -170,13 +170,6 @@ start:
 	; Define size of transfer
 	ldx #(black_bg_end - black_bg)
 	stx DAS1L       ; 43n5 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
-
-;@bgset_loop:
-;    stz VMDATAL ; $2118
-;    stz VMDATAH ; $2119
-;    inx
-;    cpx #1024
-;    bne @bgset_loop
 
 	; Load character data into VRAM - DMA Channel 0
 	lda #$80
