@@ -24,13 +24,13 @@ VRAM_BG1   = $1000
 start:
 	.include "init.asm"
 
-	; Set up the color palette
+	;;;; Set up the color palette ;;;;
 
 	; set color address to 0
 	stz CGADD
 
-; Awasu #8
-;$77BE, $62D9, $5254, $316C, $6F3B, $41F0, $0842, $18E7, $639E, $575D, $2E9C, $4EDA, $7FFF, $7C1F, $7C1F, $7C1F
+	; Awasu #8
+	;$77BE, $62D9, $5254, $316C, $6F3B, $41F0, $0842, $18E7, $639E, $575D, $2E9C, $4EDA, $7FFF, $7C1F, $7C1F, $7C1F
 
 	; Color 00
 	lda #$BE
@@ -253,6 +253,15 @@ start:
 	cpx #(oam_buffer_end - oam_lo_buffer)
 	bne @zero_oam
 
+	ldx #120
+	stx oam_lo_buffer
+	; Set sprite 0 Y position
+	ldx #104
+	stx oam_lo_buffer + 1
+	; Set sprite 0 to priority 3 and tile 0x01 12,13,14
+	ldx #((%00110000 << 8) | $000c) 
+	stx oam_lo_buffer + 2
+
 	lda #%10000001
 	sta NMITIMEN    ; $4200
 
@@ -264,10 +273,10 @@ start:
 		beq @nmi_check
 
 		; Set sprite 0 X position
-		ldx #$42
+		ldx oam_lo_buffer
 		stx oam_lo_buffer
 		; Set sprite 0 Y position
-		ldx #$69
+		ldx oam_lo_buffer + 1
 		stx oam_lo_buffer + 1
 		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
 		ldx #((%00110000 << 8) | $000c) 
@@ -277,10 +286,38 @@ start:
 		lda #%00000010 ; Set sprite 0 to be large (16x16)
 		sta oam_hi_buffer
 
+		lda JOY1H ; BYsS UDLR
+		bit #%00001000 ; UP button 
+		beq @up_not_pressed
+			ldx oam_lo_buffer
+			stx oam_lo_buffer
+			; Update sprite 0 Y position
+			ldx oam_lo_buffer + 1
+			dex
+			stx oam_lo_buffer + 1
+			; Set sprite 0 to priority 3 and tile 0x01 12,13,14
+			ldx #((%00110000 << 8) | $000c) 
+			stx oam_lo_buffer + 2
+		@up_not_pressed:
+
+		lda JOY1H ; BYsS UDLR
+		bit #%00000100 ; DOWN button 
+		beq @d_not_pressed
+			ldx oam_lo_buffer
+			stx oam_lo_buffer
+			; Update sprite 0 Y position
+			ldx oam_lo_buffer + 1
+			inx
+			stx oam_lo_buffer + 1
+			; Set sprite 0 to priority 3 and tile 0x01 12,13,14
+			ldx #((%00110000 << 8) | $000c) 
+			stx oam_lo_buffer + 2
+		@d_not_pressed:
+
 		; Copy OAM data via DMA
 		stz OAMADDL
 		lda #%00000000
-		sta DMAP1
+		sta DMAP1 ; DIxA APPP ; Write from A to B (D=0) for VRAM (PPP=001) with Fixed Address mode (A=1)
 		lda #<OAMDATA
 		sta BBAD1
 		ldx #.loword(oam_lo_buffer)
@@ -291,19 +328,6 @@ start:
 		stx DAS1L
 		lda #%00000010
 		sta MDMAEN
-		
-		; START
-		lda JOY1H ; BYsS UDLR
-		bit #%00010000 ; START button 
-		beq @start_not_pressed
-			stz x_pos
-			stz y_pos
-			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			stx VMADDL
-			lda #%1100 ; tile number
-			sta VMDATAL
-			stz VMDATAH
-		@start_not_pressed:
 
 	bra mainloop
 
