@@ -282,37 +282,44 @@ start:
 		ldx #((%00110000 << 8) | $000c) 
 		stx oam_lo_buffer + 2
 
-		;lda #%00000000 ; Set sprite 0 to be small (8x8)
-		lda #%00000010 ; Set sprite 0 to be large (16x16)
+		lda #%00000000 ; Set sprite 0 to be small (8x8)
+		;lda #%00000010 ; Set sprite 0 to be large (16x16)
 		sta oam_hi_buffer
 
 		lda JOY1H ; BYsS UDLR
 		bit #%00001000 ; UP button 
 		beq @up_not_pressed
-			ldx oam_lo_buffer
-			stx oam_lo_buffer
 			; Update sprite 0 Y position
 			ldx oam_lo_buffer + 1
 			dex
 			stx oam_lo_buffer + 1
-			; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-			ldx #((%00110000 << 8) | $000c) 
-			stx oam_lo_buffer + 2
 		@up_not_pressed:
 
-		lda JOY1H ; BYsS UDLR
 		bit #%00000100 ; DOWN button 
 		beq @d_not_pressed
-			ldx oam_lo_buffer
-			stx oam_lo_buffer
 			; Update sprite 0 Y position
 			ldx oam_lo_buffer + 1
 			inx
 			stx oam_lo_buffer + 1
-			; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-			ldx #((%00110000 << 8) | $000c) 
-			stx oam_lo_buffer + 2
 		@d_not_pressed:
+
+		bit #%00000010 ; LEFT button 
+		beq @left_not_pressed
+			ldx oam_lo_buffer
+			dex
+			stx oam_lo_buffer
+		@left_not_pressed:
+
+		bit #%00000001 ; RIGHT button 
+		beq @right_not_pressed
+			ldx oam_lo_buffer
+			inx
+			stx oam_lo_buffer
+		@right_not_pressed:
+
+		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
+		ldx #((%00110000 << 8) | $000c) 
+		stx oam_lo_buffer + 2
 
 		; Copy OAM data via DMA
 		stz OAMADDL
