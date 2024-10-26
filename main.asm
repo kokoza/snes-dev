@@ -11,6 +11,11 @@ nmi_count: .res 2
 x_pos: .res 1
 y_pos: .res 1
 
+.segment "BSS"
+oam_lo_buffer: .res 512
+oam_hi_buffer: .res 32
+oam_buffer_end:
+
 .segment "CODE"
 
 VRAM_CHARS = $0000
@@ -128,22 +133,56 @@ start:
 
 
 	; Fill remaining pallette with black
-	.repeat 240
+	.repeat 112
 		lda #$00
 		sta CGDATA
 		lda #$00
 		sta CGDATA
 	.endrepeat
 
+	;;;; Set up sprite palette ;;;;
+
+	; Color 0 = black
+	stz CGDATA
+	stz CGDATA
+
+	; Color 1 = orange*
+	lda #$0e   ; palette low byte gggrrrrr
+	sta CGDATA
+	lda #$10   ; palette high byte -bbbbbgg
+	sta CGDATA
+
+	; Color 2 = yellow* rgb = 25 23 4 = R11001G10111B00100
+	lda #%11111001   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #%0010010   ;palette high byte -bbbbbgg
+	sta CGDATA
+
+	; Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
+	lda #$B3   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #$7f   ;palette high byte -bbbbbgg
+	sta CGDATA
+
+
+	; Fill remaining sprite pallette with black
+	.repeat 120
+		lda #$00
+		sta CGDATA
+		lda #$00
+		sta CGDATA
+	.endrepeat
+
+
 	; Set Graphics Mode 1, 8x8 tiles
 	lda #%00000001
-	sta BGMODE
+	sta BGMODE    ; $2105
 
 	; Set BG1 and tile map and character data
 	lda #>VRAM_BG1
-	sta BG1SC     ; 2107
+	sta BG1SC     ; $2107
 	lda #VRAM_CHARS
-	sta BG12NBA   ; 210B
+	sta BG12NBA   ; $210B
 
 	;;;;;;;;; Set tilemap as 0s ;;;;;;;;;;
 	; Define tile map
@@ -154,19 +193,22 @@ start:
 
 	; Write from A to B (D=0) for VRAM (PPP=001) with Fixed Address mode (A=1)
 	lda #%00000001  ; DIxA APPP
-	sta DMAP1       ; 43n0 DMA Control Register
+	sta DMAP1       ; $43n0 DMA Control Register
 
 	; Write to B-Bus 2118
-	lda #<VMDATAL   ; 2118
-	sta BBAD1       ; 43n1 DMA Destination Register
+	lda #<VMDATAL   ; $2118
+	sta BBAD1       ; $43n1 DMA Destination Register
 
 	ldx #.loword(bgset)
-	stx A1T1L       ; 43n2 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
+	stx A1T1L       ; $43n2 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
 	lda #^bgset
-	sta A1B1        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
+	sta A1B1        ; $4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
 	; Define size of transfer
 	ldx #(bgset_end - bgset)
-	stx DAS1L       ; 43n5 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
+	stx DAS1L       ; $43n5 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
+	; Initiate transfer - will be done below
+	lda #%00000010  ; Initiate DMA on Channel 0 and 1
+	sta MDMAEN      ; $420B DMA Enable Register https://snes.nesdev.org/wiki/DMA_registers#MDMAEN
 
 	; Load character data into VRAM - DMA Channel 0
 	lda #$80
@@ -176,33 +218,43 @@ start:
 
 	; Set transfer pattern (PPP) to 001 for VRAM and D[irection] to 0 (A to B)
 	lda #%00000001  ; DIxA APPP
-	sta DMAP0       ; 4300 DMA Control Register https://snes.nesdev.org/wiki/DMA_registers#DMAPn
+	sta DMAP0       ; $4300 DMA Control Register https://snes.nesdev.org/wiki/DMA_registers#DMAPn
 
 	; Select B-Bus hardware register to read or write from, in the $2100-$21ff range
-	lda #<VMDATAL   ; 2118
-	sta BBAD0       ; 4301 DMA Destination Register https://snes.nesdev.org/wiki/DMA_registers#BBADn
+	lda #<VMDATAL   ; $2118
+	sta BBAD0       ; $4301 DMA Destination Register https://snes.nesdev.org/wiki/DMA_registers#BBADn
 
 	ldx #.loword(charset)
-	stx A1T0L       ; 4302 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
+	stx A1T0L       ; $4302 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1TnL
 	lda #^charset
-	sta A1B0        ; 4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
+	sta A1B0        ; $4304 DMA Source Address Registers https://snes.nesdev.org/wiki/DMA_registers#A1Bn
 	ldx #(charset_end - charset)
-	stx DAS0L       ; 4305 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
-	
-	; Initiate transfer - will be done below
-	lda #%00000011  ; Initiate DMA on Channel 0 and 1
-	sta MDMAEN      ; 420B DMA Enable Register https://snes.nesdev.org/wiki/DMA_registers#MDMAEN
+	stx DAS0L       ; $4305 DMA Size Registers (Low) https://snes.nesdev.org/wiki/DMA_registers#DASnL
 
-	; Show BG1
-	lda #%00000001
-	sta TM
+	; Initiate transfer - will be done below
+	lda #%00000001  ; Initiate DMA on Channel 0 and 1
+	sta MDMAEN      ; $420B DMA Enable Register https://snes.nesdev.org/wiki/DMA_registers#MDMAEN
+
+	; Show OBJ + BG1
+	lda #%00010001  ; ...O 4321
+	sta TM          ; $212C
 
 	; turn the screen on (end forced blank)
 	lda #$0f
-	sta INIDISP
+	sta INIDISP     ; $2100
+
+	lda #%0000000
+	sta OBSEL
+
+	ldx #0
+@zero_oam:
+	stz oam_lo_buffer, x
+	inx
+	cpx #(oam_buffer_end - oam_lo_buffer)
+	bne @zero_oam
 
 	lda #%10000001
-	sta NMITIMEN
+	sta NMITIMEN    ; $4200
 
 	mainloop:
 		lda nmi_count
@@ -210,6 +262,35 @@ start:
 		wai
 		cmp nmi_count
 		beq @nmi_check
+
+		; Set sprite 0 X position
+		ldx #$42
+		stx oam_lo_buffer
+		; Set sprite 0 Y position
+		ldx #$69
+		stx oam_lo_buffer + 1
+		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
+		ldx #((%00110000 << 8) | $000c) 
+		stx oam_lo_buffer + 2
+
+		;lda #%00000000 ; Set sprite 0 to be small (8x8)
+		lda #%00000010 ; Set sprite 0 to be large (16x16)
+		sta oam_hi_buffer
+
+		; Copy OAM data via DMA
+		stz OAMADDL
+		lda #%00000000
+		sta DMAP1
+		lda #<OAMDATA
+		sta BBAD1
+		ldx #.loword(oam_lo_buffer)
+		stx A1T1L
+		lda #^oam_lo_buffer
+		sta A1B1
+		ldx #(oam_buffer_end - oam_lo_buffer)
+		stx DAS1L
+		lda #%00000010
+		sta MDMAEN
 		
 		; START
 		lda JOY1H ; BYsS UDLR
@@ -219,43 +300,10 @@ start:
 			stz y_pos
 			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
 			stx VMADDL
-			lda #$04 ; tile number
+			lda #%1100 ; tile number
 			sta VMDATAL
 			stz VMDATAH
 		@start_not_pressed:
-
-		; DOWN
-		lda JOY1H ; BYsS UDLR
-		bit #%00000100 ; DOWN
-		beq @down_not_pressed
-			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			stx VMADDL
-			lda #$02 ; tile number
-			sta VMDATAL
-			stz VMDATAH
-		@down_not_pressed:
-		
-		; RIGHT
-		lda JOY1H ; BYsS UDLR
-		bit #%00000001 ; RIGHT
-		beq @right_not_pressed
-			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			stx VMADDL
-			lda #$03 ; tile number
-			sta VMDATAL
-			stz VMDATAH
-		@right_not_pressed:
-
-		; UP
-		lda JOY1H ; BYsS UDLR
-		bit #%00001000 ; UP
-		beq @up_not_pressed
-			ldx #(VRAM_BG1 + (x_pos * 32) + y_pos)
-			stx VMADDL
-			lda #$01 ; tile number
-			sta VMDATAL
-			stz VMDATAH
-		@up_not_pressed:
 
 	bra mainloop
 
@@ -266,3 +314,4 @@ _rti:
 	rti
 
 .include "charset.asm"
+.include "bgset.asm"
