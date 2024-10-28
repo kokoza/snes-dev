@@ -253,13 +253,15 @@ start:
 	cpx #(oam_buffer_end - oam_lo_buffer)
 	bne @zero_oam
 
+	obj_0 = $000c ; Define object one as tile  12
+
 	ldx #120
 	stx oam_lo_buffer
 	; Set sprite 0 Y position
 	ldx #104
 	stx oam_lo_buffer + 1
 	; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-	ldx #((%00110000 << 8) | $000c) 
+	ldx #((%00110000 << 8) | obj_0) 
 	stx oam_lo_buffer + 2
 
 	lda #%10000001
@@ -279,46 +281,20 @@ start:
 		ldx oam_lo_buffer + 1
 		stx oam_lo_buffer + 1
 		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-		ldx #((%00110000 << 8) | $000c) 
+		ldx #((%00110000 << 8) | obj_0) 
 		stx oam_lo_buffer + 2
 
 		lda #%00000000 ; Set sprite 0 to be small (8x8)
 		;lda #%00000010 ; Set sprite 0 to be large (16x16)
 		sta oam_hi_buffer
 
-		lda JOY1H ; BYsS UDLR
-		bit #%00001000 ; UP button 
-		beq @up_not_pressed
-			; Update sprite 0 Y position
-			ldx oam_lo_buffer + 1
-			dex
-			stx oam_lo_buffer + 1
-		@up_not_pressed:
-
-		bit #%00000100 ; DOWN button 
-		beq @d_not_pressed
-			; Update sprite 0 Y position
-			ldx oam_lo_buffer + 1
-			inx
-			stx oam_lo_buffer + 1
-		@d_not_pressed:
-
-		bit #%00000010 ; LEFT button 
-		beq @left_not_pressed
-			ldx oam_lo_buffer
-			dex
-			stx oam_lo_buffer
-		@left_not_pressed:
-
-		bit #%00000001 ; RIGHT button 
-		beq @right_not_pressed
-			ldx oam_lo_buffer
-			inx
-			stx oam_lo_buffer
-		@right_not_pressed:
+		jsr up_button
+		jsr down_button
+		jsr right_button
+		jsr left_button
 
 		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-		ldx #((%00110000 << 8) | $000c) 
+		ldx #((%00110000 << 8) | obj_0) 
 		stx oam_lo_buffer + 2
 
 		; Copy OAM data via DMA
@@ -337,6 +313,52 @@ start:
 		sta MDMAEN
 
 	bra mainloop
+
+.proc up_button
+		lda JOY1H ; BYsS UDLR
+		bit #%00001000 ; UP button 
+		beq @up_not_pressed
+			; Update sprite 0 Y position
+			ldx oam_lo_buffer + 1
+			dex
+			stx oam_lo_buffer + 1
+		@up_not_pressed:
+		rts
+.endproc
+
+.proc down_button
+		lda JOY1H ; BYsS UDLR
+		bit #%00000100 ; DOWN button 
+		beq @d_not_pressed
+			; Update sprite 0 Y position
+			ldx oam_lo_buffer + 1
+			inx
+			stx oam_lo_buffer + 1
+		@d_not_pressed:
+		rts
+.endproc
+
+.proc left_button
+		lda JOY1H ; BYsS UDLR
+		bit #%00000010 ; LEFT button 
+		beq @left_not_pressed
+			ldx oam_lo_buffer
+			dex
+			stx oam_lo_buffer
+		@left_not_pressed:
+		rts
+.endproc
+
+.proc right_button
+		lda JOY1H ; BYsS UDLR
+		bit #%00000001 ; RIGHT button 
+		beq @right_not_pressed
+			ldx oam_lo_buffer
+			inx
+			stx oam_lo_buffer
+		@right_not_pressed:
+		rts
+.endproc
 
 nmi:
 	bit RDNMI
