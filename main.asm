@@ -8,8 +8,6 @@
 
 .segment "ZEROPAGE"
 nmi_count: .res 2
-x_pos: .res 1
-y_pos: .res 1
 
 .segment "BSS"
 oam_lo_buffer: .res 512
