@@ -1,6 +1,6 @@
 charset:
 
-	; tile %0000 0000 - R1-2 black (0110)
+	; tile %0000  - R1-2 black (0110)
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %00000000 ; R1 - 0
@@ -35,7 +35,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0001 - row 3 - black (0110) with dark gray (0111)
+    ; tile %0001 - row 3 - black (0110) with dark gray (0111)
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %00000000 ; R1 - 0
@@ -70,7 +70,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0010 - row 3 - black (0110) with dark gray (0111)
+    ; tile %0010 - row 3 - black (0110) with dark gray (0111)
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %00000000 ; R1 - 0
@@ -105,7 +105,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0011 - row 3 - black (0110) with dark gray (0111)
+    ; tile %0011 - row 3 - black (0110) with dark gray (0111)
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %00000000 ; R1 - 0
@@ -140,7 +140,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0100 - row 4 - mix of black (0110) dark gray (0111)
+    ; tile %0100 - row 4 - mix of black (0110) dark gray (0111)
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %10100000 ; R1 - 0
@@ -175,7 +175,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0101 - row 4 - mix of black (0110) dark gray (0111) #2
+    ; tile %0101 - row 4 - mix of black (0110) dark gray (0111) #2
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %00110000 ; R1 - 0
@@ -210,7 +210,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0110 - row 5 -  dark gray (0111) with black (0110)
+    ; tile %0110 - row 5 -  dark gray (0111) with black (0110)
         .byte   %01010101 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %01101010 ; R1 - 0
@@ -245,7 +245,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 0111 - row 5 -  dark gray (0111) with black (0110)
+    ; tile %0111 - row 5 -  dark gray (0111) with black (0110)
         .byte   %01010101 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %11101010 ; R1 - 0
@@ -280,7 +280,7 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 1000 - row 6 -  dark gray (0111) with 316C gray (0011)
+    ; tile %1000 - row 6 -  dark gray (0111) with 316C gray (0011)
         .byte   %11111111 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %11111111 ; R1 - 0
@@ -315,7 +315,7 @@ charset:
         .byte   %00000000 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 1001 - row 6 -  dark gray (0111) with 316C gray (0011)
+    ; tile %1001 - row 6 -  dark gray (0111) with 316C gray (0011)
         .byte   %11111111 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %11111111 ; R1 - 0
@@ -350,7 +350,7 @@ charset:
         .byte   %00000000 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 1010 - row 7 -  316C gray (0011) and 41F0 gray (0101)
+    ; tile %1010 - row 7 -  316C gray (0011) and 41F0 gray (0101)
         .byte   %11111111 ; R0 - 0
         .byte   %01111110 ; R0 - 1
         .byte   %11111111 ; R1 - 0
@@ -385,7 +385,9 @@ charset:
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile %0000 1011 - row 7 -  316C gray (0011) and 41F0 gray (0101)
+    
+
+    ; tile %1011 - row 7 -  316C gray (0011) and 41F0 gray (0101)
         .byte   %11111111 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %11111111 ; R1 - 0
@@ -419,8 +421,8 @@ charset:
         .byte   %00000000 ; R6 - 3
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
-
-	; tile 0x0a
+        
+    ; tile %1100 Yellow Kolobok
         .byte   %00000000 ; R0 - 0
         .byte   %00000000 ; R0 - 1
         .byte   %00000000 ; R1 - 0
@@ -455,7 +457,7 @@ charset:
         .byte   %00000000 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-    ; tile 0x0b
+    ; tile %1101 Red Bolobok
         .byte   %00000000 ; R0 - 0
         .byte   %00000000 ; R0 - 1
         .byte   %00111100 ; R1 - 0
@@ -490,12 +492,8 @@ charset:
         .byte   %00000000 ; R7 - 2
         .byte   %00000000 ; R7 - 3
 
-        .repeat 14*4*8
-        .byte 0
-        .endrepeat
-
         .repeat 2
-    ; tile 0x0c
+    ; tile %1110 Blue Kolobok x2 (and %1111) 
         .byte   %00000000 ; R0 - 0
         .byte   %00000000 ; R0 - 1
         .byte   %00111100 ; R1 - 0
@@ -531,8 +529,158 @@ charset:
         .byte   %00000000 ; R7 - 3
 
         .endrepeat
+
+	; tile $10
+        .byte   %00011111 ; R0 - 0
+        .byte   %00000000 ; R0 - 1
+        .byte   %00100000 ; R1 - 0
+        .byte   %00000000 ; R1 - 1
+        .byte   %01001000 ; R2 - 0
+        .byte   %00000000 ; R2 - 1
+        .byte   %10000000 ; R3 - 0
+        .byte   %00000000 ; R3 - 1
+        .byte   %10000100 ; R4 - 0
+        .byte   %00000000 ; R4 - 1
+        .byte   %10000100 ; R5 - 0
+        .byte   %01000000 ; R5 - 1
+        .byte   %10000000 ; R6 - 0
+        .byte   %01000000 ; R6 - 1
+        .byte   %01000111 ; R7 - 0
+        .byte   %00100000 ; R7 - 1
+
+        .byte   %00000000 ; R0 - 2
+        .byte   %00000000 ; R0 - 3
+        .byte   %00011111 ; R1 - 2
+        .byte   %00000000 ; R1 - 3
+        .byte   %00111111 ; R2 - 2
+        .byte   %00000000 ; R2 - 3
+        .byte   %01111111 ; R3 - 2
+        .byte   %00000000 ; R3 - 3
+        .byte   %01111011 ; R4 - 2
+        .byte   %00000000 ; R4 - 3
+        .byte   %00111011 ; R5 - 2
+        .byte   %00000000 ; R5 - 3
+        .byte   %00111111 ; R6 - 2
+        .byte   %00000000 ; R6 - 3
+        .byte   %00011000 ; R7 - 2
+        .byte   %00000000 ; R7 - 3
+
+    ; tile 0x11
+        .byte   %00000000 ; R0 - 0
+        .byte   %00000000 ; R0 - 1
+        .byte   %10000000 ; R1 - 0
+        .byte   %00000000 ; R1 - 1
+        .byte   %01000000 ; R2 - 0
+        .byte   %00000000 ; R2 - 1
+        .byte   %00100000 ; R3 - 0
+        .byte   %00000000 ; R3 - 1
+        .byte   %10100000 ; R4 - 0
+        .byte   %00000000 ; R4 - 1
+        .byte   %10100000 ; R5 - 0
+        .byte   %00000000 ; R5 - 1
+        .byte   %00100000 ; R6 - 0
+        .byte   %00000000 ; R6 - 1
+        .byte   %01100000 ; R7 - 0
+        .byte   %10000000 ; R7 - 1
+
+        .byte   %00000000 ; R0 - 2
+        .byte   %00000000 ; R0 - 3
+        .byte   %00000000 ; R1 - 2
+        .byte   %00000000 ; R1 - 3
+        .byte   %10000000 ; R2 - 2
+        .byte   %00000000 ; R2 - 3
+        .byte   %11000000 ; R3 - 2
+        .byte   %00000000 ; R3 - 3
+        .byte   %01000000 ; R4 - 2
+        .byte   %00000000 ; R4 - 3
+        .byte   %01000000 ; R5 - 2
+        .byte   %00000000 ; R5 - 3
+        .byte   %11000000 ; R6 - 2
+        .byte   %00000000 ; R6 - 3
+        .byte   %00000000 ; R7 - 2
+        .byte   %00000000 ; R7 - 3
+
+        .repeat 14*32
+        .byte 0
+        .endrepeat
+
+    ; tile 0x20
+        .byte   %10110001 ; R0 - 0
+        .byte   %01010001 ; R0 - 1
+        .byte   %11111111 ; R1 - 0
+        .byte   %01011111 ; R1 - 1
+        .byte   %11111111 ; R2 - 0
+        .byte   %01100000 ; R2 - 1
+        .byte   %01110000 ; R3 - 0
+        .byte   %00000000 ; R3 - 1
+        .byte   %00000000 ; R4 - 0
+        .byte   %00000000 ; R4 - 1
+        .byte   %00000000 ; R5 - 0
+        .byte   %00000000 ; R5 - 1
+        .byte   %00000000 ; R6 - 0
+        .byte   %00000000 ; R6 - 1
+        .byte   %00000000 ; R7 - 0
+        .byte   %00000000 ; R7 - 1
+
+        .byte   %00001110 ; R0 - 2
+        .byte   %00000000 ; R0 - 3
+        .byte   %00000000 ; R1 - 2
+        .byte   %00000000 ; R1 - 3
+        .byte   %00000000 ; R2 - 2
+        .byte   %00000000 ; R2 - 3
+        .byte   %00000000 ; R3 - 2
+        .byte   %00000000 ; R3 - 3
+        .byte   %00000000 ; R4 - 2
+        .byte   %00000000 ; R4 - 3
+        .byte   %00000000 ; R5 - 2
+        .byte   %00000000 ; R5 - 3
+        .byte   %00000000 ; R6 - 2
+        .byte   %00000000 ; R6 - 3
+        .byte   %00000000 ; R7 - 2
+        .byte   %00000000 ; R7 - 3
+
+    ; tile 0x21
+        .byte   %11110000 ; R0 - 0
+        .byte   %01100000 ; R0 - 1
+        .byte   %11110000 ; R1 - 0
+        .byte   %00000000 ; R1 - 1
+        .byte   %00100000 ; R2 - 0
+        .byte   %11000000 ; R2 - 1
+        .byte   %11000000 ; R3 - 0
+        .byte   %00000000 ; R3 - 1
+        .byte   %00000000 ; R4 - 0
+        .byte   %00000000 ; R4 - 1
+        .byte   %00000000 ; R5 - 0
+        .byte   %00000000 ; R5 - 1
+        .byte   %00000000 ; R6 - 0
+        .byte   %00000000 ; R6 - 1
+        .byte   %00000000 ; R7 - 0
+        .byte   %00000000 ; R7 - 1
+
+        .byte   %00000000 ; R0 - 2
+        .byte   %00000000 ; R0 - 3
+        .byte   %00000000 ; R1 - 2
+        .byte   %00000000 ; R1 - 3
+        .byte   %00000000 ; R2 - 2
+        .byte   %00000000 ; R2 - 3
+        .byte   %00000000 ; R3 - 2
+        .byte   %00000000 ; R3 - 3
+        .byte   %00000000 ; R4 - 2
+        .byte   %00000000 ; R4 - 3
+        .byte   %00000000 ; R5 - 2
+        .byte   %00000000 ; R5 - 3
+        .byte   %00000000 ; R6 - 2
+        .byte   %00000000 ; R6 - 3
+        .byte   %00000000 ; R7 - 2
+        .byte   %00000000 ; R7 - 3
+
+        .repeat 14*32
+        .byte 0
+        .endrepeat
+
+
         ; Fill remaining tiles with orange and black
-        .repeat 4 ; 32*64-9
+        .repeat 16; 32*64-9
         .byte   %00000000 ; R0 - 0
         .byte   %11111111 ; R0 - 1
         .byte   %00000000 ; R1 - 0
@@ -600,6 +748,10 @@ charset:
         .byte   %00000000 ; R6 - 3
         .byte   %11111111 ; R7 - 2
         .byte   %00000000 ; R7 - 3
+        .endrepeat
+
+        .repeat 176*32
+        .byte 0
         .endrepeat
 
 charset_end:

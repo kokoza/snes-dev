@@ -138,33 +138,82 @@ start:
 		sta CGDATA
 	.endrepeat
 
-	;;;; Set up sprite palette ;;;;
+	;;;; Set up sprite palette (starting at index 128) ;;;;
 
-	; Color 0 = black
+	; Sprite Row 0 - Color 0 = black
 	stz CGDATA
 	stz CGDATA
 
-	; Color 1 = orange*
+	; Sprite Row 0 - Color 1 = orange*
 	lda #$0e   ; palette low byte gggrrrrr
 	sta CGDATA
 	lda #$10   ; palette high byte -bbbbbgg
 	sta CGDATA
 
-	; Color 2 = yellow* rgb = 25 23 4 = R11001G10111B00100
+	; Sprite Row 0 - Color 2 = yellow* rgb = 25 23 4 => R11001 g.G10.111 B00100 -> GR = 11111001 and Bg = 10
 	lda #%11111001   ;palette low byte gggrrrrr
 	sta CGDATA
 	lda #%0010010   ;palette high byte -bbbbbgg
 	sta CGDATA
 
-	; Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
+	; Sprite Row 0 - Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
 	lda #$B3   ;palette low byte gggrrrrr
 	sta CGDATA
 	lda #$7f   ;palette high byte -bbbbbgg
 	sta CGDATA
 
+	; Fill remaining sprite pallette row with black
+	.repeat 12
+		lda #$00
+		sta CGDATA
+		lda #$00
+		sta CGDATA
+	.endrepeat
+	
+	; Sprite Row 1 - Color 0 = black -- KOLOBOK
+	stz CGDATA
+	stz CGDATA
+
+	; Sprite Row 1 - Color 1 = RGB = 22 14 01 => R10110 g.G01.110 B00001 -> GR = 11010110 and Bg = B0000101
+	lda #%00100000   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #%0000100   ;palette high byte -bbbbbgg
+	sta CGDATA
+	
+	; Sprite Row 1 - Color 2 = RGB = 22 14 01 => R10110 g.G01.110 B00001 -> GR = 11010110 and Bg = B0000101
+	lda #%11010110   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #%0000101   ;palette high byte -bbbbbgg
+	sta CGDATA
+
+	; Sprite Row 1 - Color 3 = RGB = 27 19 02 => 11011 10 011 00010
+	lda #%01111011   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #%0001010   ;palette high byte -bbbbbgg
+	sta CGDATA
+
+	; Sprite Row 1 - Color 4 = RGB = 30 25 05 => 11110 11 001 00101
+	lda #%00111110   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #%0010111   ;palette high byte -bbbbbgg
+	sta CGDATA
+
+	; Sprite Row 1 - Color 5 = RGB = 30 27 09 => 11110 11 011 01001
+	lda #%01111110   ;palette low byte gggrrrrr
+	sta CGDATA
+	lda #%0100111   ;palette high byte -bbbbbgg
+	sta CGDATA
+
+	; Fill remaining sprite pallette row with black
+	.repeat 10
+		lda #$00
+		sta CGDATA
+		lda #$00
+		sta CGDATA
+	.endrepeat
 
 	; Fill remaining sprite pallette with black
-	.repeat 120
+	.repeat 96
 		lda #$00
 		sta CGDATA
 		lda #$00
@@ -241,7 +290,7 @@ start:
 	lda #$0f
 	sta INIDISP     ; $2100
 
-	lda #%0000000
+	lda #%00000000
 	sta OBSEL
 
 	ldx #0
@@ -251,15 +300,16 @@ start:
 	cpx #(oam_buffer_end - oam_lo_buffer)
 	bne @zero_oam
 
-	obj_0 = $000c ; Define object one as tile  12
+	obj_0 = $0010 ; Define object one as tile  16
 
+	; Set sprite 0 X position?
 	ldx #120
 	stx oam_lo_buffer
 	; Set sprite 0 Y position
 	ldx #104
 	stx oam_lo_buffer + 1
-	; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-	ldx #((%00110000 << 8) | obj_0) 
+	; Set sprite 0 to priority 3 and palette to 001
+	ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
 	stx oam_lo_buffer + 2
 
 	lda #%10000001
@@ -278,12 +328,12 @@ start:
 		; Set sprite 0 Y position
 		ldx oam_lo_buffer + 1
 		stx oam_lo_buffer + 1
-		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-		ldx #((%00110000 << 8) | obj_0) 
+		; Set sprite 0 to priority 3 and palette to 001
+		ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
 		stx oam_lo_buffer + 2
 
-		lda #%00000000 ; Set sprite 0 to be small (8x8)
-		;lda #%00000010 ; Set sprite 0 to be large (16x16)
+		;lda #%00000000 ; Set sprite 0 to be small (8x8 or 16x16 depending on OBSEL)
+		lda #%00000010 ; Set sprite 0 to be large (16x16 or 32x32 depending on OBSEL)
 		sta oam_hi_buffer
 
 		jsr up_button
@@ -291,8 +341,8 @@ start:
 		jsr right_button
 		jsr left_button
 
-		; Set sprite 0 to priority 3 and tile 0x01 12,13,14
-		ldx #((%00110000 << 8) | obj_0) 
+		; Set sprite 0 to priority 3 and palette to 001
+		ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
 		stx oam_lo_buffer + 2
 
 		; Copy OAM data via DMA
