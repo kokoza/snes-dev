@@ -21,3 +21,10 @@
 .macro setXY16
 	rep #$10
 .endmacro
+
+.macro load_color low, high
+	lda #low
+	sta CGDATA
+	lda #high
+	sta CGDATA
+.endmacro

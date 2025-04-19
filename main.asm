@@ -30,195 +30,57 @@ start:
 
 	; Awasu #8
 	;$77BE, $62D9, $5254, $316C, $6F3B, $41F0, $0842, $18E7, $639E, $575D, $2E9C, $4EDA, $7FFF, $7C1F, $7C1F, $7C1F
-
-	; Color 00
-	lda #$BE
-	sta CGDATA
-	lda #$77
-	sta CGDATA
-
-	; Color 01
-	lda #$D9   ; palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$62   ; palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 02
-	lda #$54   ;palette low byte gggrrrrr
-	sta CGDATA ; 1f = 
-	lda #$52   ;palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-
-	; Color 03
-	lda #$6C   ;palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$31   ;palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 04
-	lda #$3B
-	sta CGDATA
-	lda #$6F
-	sta CGDATA
-
-	; Color 05
-	lda #$F0   ; palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$41   ; palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 06
-	lda #$42   ;palette low byte gggrrrrr
-	sta CGDATA ; 1f = 
-	lda #$08   ;palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-
-	; Color 07
-	lda #$E7   ;palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$18   ;palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 08
-	lda #$9E
-	sta CGDATA
-	lda #$63
-	sta CGDATA
-
-	; Color 09
-	lda #$5D   ; palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$57   ; palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 0A
-	lda #$9C   ;palette low byte gggrrrrr
-	sta CGDATA ; 1f = 
-	lda #$2E   ;palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 0B
-	lda #$DA   ;palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$4E   ;palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 0C
-	lda #$FF
-	sta CGDATA
-	lda #$7F
-	sta CGDATA
-
-	; Color 0D 
-	lda #$1F   ; palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$7C   ; palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-	; Color 0E 
-	lda #$1F   ; palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$7C   ; palette high byte -bbbbbgg
-	sta CGDATA ; 
-
-
-	; Color 0F
-	lda #$1F   ; palette low byte gggrrrrr
-	sta CGDATA ; 
-	lda #$7C   ; palette high byte -bbbbbgg
-	sta CGDATA ; 
-
+	; Load colors for BG (Awasu #8)
+	load_color $BE, $77 ; Color 00
+	load_color $D9, $62 ; Color 01
+	load_color $54, $52 ; Color 02 
+	load_color $6C, $31 ; Color 03
+	load_color $3B, $6F ; Color 04
+	load_color $F0, $41 ; Color 05
+	load_color $42, $08 ; Color 06
+	load_color $E7, $18 ; Color 07
+	load_color $9E, $63 ; Color 08
+	load_color $5D, $57 ; Color 09
+	load_color $9C, $2E ; Color 0A
+	load_color $DA, $4E ; Color 0B
+	load_color $FF, $7F ; Color 0C
+	load_color $1F, $7C ; Color 0D
+	load_color $1F, $7C ; Color 0E
+	load_color $1F, $7C ; Color 0F
 
 	; Fill remaining pallette with black
 	.repeat 112
-		lda #$00
-		sta CGDATA
-		lda #$00
-		sta CGDATA
+		load_color $00, $00 
 	.endrepeat
 
 	;;;; Set up sprite palette (starting at index 128) ;;;;
 
-	; Sprite Row 0 - Color 0 = black
-	stz CGDATA
-	stz CGDATA
-
-	; Sprite Row 0 - Color 1 = orange*
-	lda #$0e   ; palette low byte gggrrrrr
-	sta CGDATA
-	lda #$10   ; palette high byte -bbbbbgg
-	sta CGDATA
-
-	; Sprite Row 0 - Color 2 = yellow* rgb = 25 23 4 => R11001 g.G10.111 B00100 -> GR = 11111001 and Bg = 10
-	lda #%11111001   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #%0010010   ;palette high byte -bbbbbgg
-	sta CGDATA
-
-	; Sprite Row 0 - Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
-	lda #$B3   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #$7f   ;palette high byte -bbbbbgg
-	sta CGDATA
+	
+	load_color $00, $00 ; Sprite Row 0 - Color 0 = black
+	load_color $0E, $10 ; Sprite Row 0 - Color 1 = orange
+	load_color %11111001, %0010010 ; Sprite Row 0 - Color 2 = yellow* rgb = 25 23 4 => R11001 g.G10.111 B00100 -> GR = 11111001 and Bg = 10
+	load_color $B3, $7F ; Sprite Row 0 - Color 3 = blue rgb = 19 29 31 = R10011G11101B11111
 
 	; Fill remaining sprite pallette row with black
 	.repeat 12
-		lda #$00
-		sta CGDATA
-		lda #$00
-		sta CGDATA
+		load_color $00, $00 
 	.endrepeat
-	
-	; Sprite Row 1 - Color 0 = black -- KOLOBOK
-	stz CGDATA
-	stz CGDATA
 
-	; Sprite Row 1 - Color 1 = RGB = 22 14 01 => R10110 g.G01.110 B00001 -> GR = 11010110 and Bg = B0000101
-	lda #%00100000   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #%0000100   ;palette high byte -bbbbbgg
-	sta CGDATA
-	
-	; Sprite Row 1 - Color 2 = RGB = 22 14 01 => R10110 g.G01.110 B00001 -> GR = 11010110 and Bg = B0000101
-	lda #%11010110   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #%0000101   ;palette high byte -bbbbbgg
-	sta CGDATA
-
-	; Sprite Row 1 - Color 3 = RGB = 27 19 02 => 11011 10 011 00010
-	lda #%01111011   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #%0001010   ;palette high byte -bbbbbgg
-	sta CGDATA
-
-	; Sprite Row 1 - Color 4 = RGB = 30 25 05 => 11110 11 001 00101
-	lda #%00111110   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #%0010111   ;palette high byte -bbbbbgg
-	sta CGDATA
-
-	; Sprite Row 1 - Color 5 = RGB = 30 27 09 => 11110 11 011 01001
-	lda #%01111110   ;palette low byte gggrrrrr
-	sta CGDATA
-	lda #%0100111   ;palette high byte -bbbbbgg
-	sta CGDATA
+	load_color $00, $00 ; Sprite Row 1 - Color 0 = black -- KOLOBOK
+	load_color %00100000, %0000100 ; Sprite Row 1 - Color 1 = RGB = ?? ?? ?? 
+	load_color %11010110, %0000101 ; Sprite Row 1 - Color 2 = RGB = 22 14 01 => R10110 g.G01.110 B00001 -> GR = 11010110 and Bg = B0000101
+	load_color %01111011, %0001010 ; Sprite Row 1 - Color 3 = RGB = 27 19 02 => 11011 10 011 00010
+	load_color %00111110, %0010111 ; Sprite Row 1 - Color 4 = RGB = 30 25 05 => 11110 11 001 00101
+	load_color %01111110, %0100111 ; Sprite Row 1 - Color 5 = RGB = 30 27 09 => 11110 11 011 01001
 
 	; Fill remaining sprite pallette row with black
 	.repeat 10
-		lda #$00
-		sta CGDATA
-		lda #$00
-		sta CGDATA
+		load_color $00, $00 
 	.endrepeat
 
 	; Fill remaining sprite pallette with black
 	.repeat 96
-		lda #$00
-		sta CGDATA
-		lda #$00
-		sta CGDATA
+		load_color $00, $00 
 	.endrepeat
 
 
@@ -323,6 +185,9 @@ start:
 		cmp nmi_count
 		beq @nmi_check
 
+	    jsr handle_input   ; Now uses pre-latched controller byte
+	    ;jsr update_game    ; Game logic here if needed
+	    ;jsr draw_sprites   ; Optional, or do DMA to OAM directly here
 		; Set sprite 0 X position
 		ldx oam_lo_buffer
 		stx oam_lo_buffer
@@ -361,8 +226,8 @@ start:
 	bra mainloop
 
 .proc handle_input
-    lda JOY1H         ; Read once: BYsSUDLR
-    sta controller    ; Optional: store for later use or debugging
+    ; Load controller to accumulator
+    lda controller
 
     ; UP (bit 3)
     bit #%00001000 ; Up - BYsS UDLR
@@ -388,15 +253,27 @@ start:
         inc oam_lo_buffer
     @not_right:
 
-
-
     rts
 .endproc
 
 
 
 nmi:
-	bit RDNMI
+	bit RDNMI         ; $4210 - Clear NMI flag
+
+	; Latch controller input
+    lda #%00000001
+    sta $4016
+    stz $4016
+
+    ; Read controller input
+    lda $4218         ; JOY1L - ignored in your case
+    lda $4219         ; JOY1H - BYsSUDLR
+    sta controller    ; Store for use in main loop
+
+    ; Optional: Copy OAM here (can stay in main loop too if working fine)
+
+    ; Signal main loop that a new frame has started
 	inc nmi_count
 _rti:
 	rti
