@@ -8,7 +8,9 @@
 
 .segment "ZEROPAGE"
 nmi_count: .res 2
-controller: .res 1 ; Reserve 1 byte
+controller: .res 1     ; Controller input for debugging 
+sprite_y_vel: .res 1   ; signed 8-bit vertical velocity
+
 
 .segment "BSS"
 oam_lo_buffer: .res 512
@@ -16,6 +18,9 @@ oam_hi_buffer: .res 32
 oam_buffer_end:
 
 .segment "CODE"
+
+GROUND_Y     = $80     ; example ground position (Y = 128)
+JUMP_STRENGTH = $F8    ; -8 in 2's complement (going up)
 
 VRAM_CHARS = $0000
 VRAM_BG1   = $1000
@@ -338,6 +343,7 @@ start:
 		sta oam_hi_buffer
 
 		jsr handle_input
+		jsr apply_gravity
 
 		; Set sprite 0 to priority 3 and palette to 001
 		ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
@@ -364,6 +370,17 @@ start:
     lda JOY1H         ; Read once: BYsSUDLR
     sta controller    ; Optional: store for later use or debugging
 
+    ; B BUTTON (bit 7)
+    bit #%10000000
+    beq @not_b
+        ; Check if on ground before jumping
+        lda oam_lo_buffer + 1
+        cmp #GROUND_Y
+        bne @not_b        ; Only allow jump if on ground
+        lda #JUMP_STRENGTH
+        sta sprite_y_vel
+    @not_b:
+
     ; UP (bit 3)
     bit #%00001000 ; Up - BYsS UDLR
     beq @not_up
@@ -388,12 +405,32 @@ start:
         inc oam_lo_buffer
     @not_right:
 
-
-
     rts
 .endproc
 
+.proc apply_gravity
+    ; apply gravity
+    lda sprite_y_vel
+    cmp #$7F
+    beq @skip_gravity    ; Cap falling speed at +127
+    clc
+    adc #1               ; gravity = +1
+    sta sprite_y_vel
+@skip_gravity:
 
+    ; update Y position
+    lda oam_lo_buffer + 1
+    clc
+    adc sprite_y_vel
+    cmp #GROUND_Y
+    bcc @store_y         ; if Y < ground, store it
+    lda #GROUND_Y        ; clamp to ground
+    lda #0
+    sta sprite_y_vel     ; stop downward motion
+@store_y:
+    sta oam_lo_buffer + 1
+    rts
+.endproc
 
 nmi:
 	bit RDNMI
