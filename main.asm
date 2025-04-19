@@ -8,6 +8,7 @@
 
 .segment "ZEROPAGE"
 nmi_count: .res 2
+controller: .res 1 ; Reserve 1 byte
 
 .segment "BSS"
 oam_lo_buffer: .res 512
@@ -222,7 +223,7 @@ start:
 
 
 	; Set Graphics Mode 1, 8x8 tiles
-	lda #%00000001
+	lda #%00000001 ; 4321 PMMM MMM - BG mode see https://snes.nesdev.org/wiki/PPU_registers#BGMODE
 	sta BGMODE    ; $2105
 
 	; Set BG1 and tile map and character data
@@ -238,7 +239,7 @@ start:
 	ldx #VRAM_BG1
 	stx VMADDL    ; $2116
 
-	; Write from A to B (D=0) for VRAM (PPP=001) with Fixed Address mode (A=1)
+	; Write from A to B (D=0) for VRAM (PPP=001), Incrementing A Bus after copy (AA=0) https://snes.nesdev.org/wiki/DMA_registers#DMAPn
 	lda #%00000001  ; DIxA APPP
 	sta DMAP1       ; $43n0 DMA Control Register
 
@@ -336,10 +337,7 @@ start:
 		lda #%00000010 ; Set sprite 0 to be large (16x16 or 32x32 depending on OBSEL)
 		sta oam_hi_buffer
 
-		jsr up_button
-		jsr down_button
-		jsr right_button
-		jsr left_button
+		jsr handle_input
 
 		; Set sprite 0 to priority 3 and palette to 001
 		ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
@@ -347,8 +345,8 @@ start:
 
 		; Copy OAM data via DMA
 		stz OAMADDL
-		lda #%00000000
-		sta DMAP1 ; DIxA APPP ; Write from A to B (D=0) for VRAM (PPP=001) with Fixed Address mode (A=1)
+		lda #%00000000 ; DIxA APPP https://snes.nesdev.org/wiki/DMA_registers#DMAPn
+		sta DMAP1      ; Write from A to B (D=0), for WRAM (PPP=000), Incrementing A Bus after copy (AA=0)
 		lda #<OAMDATA
 		sta BBAD1
 		ldx #.loword(oam_lo_buffer)
@@ -362,51 +360,40 @@ start:
 
 	bra mainloop
 
-.proc up_button
-		lda JOY1H ; BYsS UDLR
-		bit #%00001000 ; UP button 
-		beq @up_not_pressed
-			; Update sprite 0 Y position
-			ldx oam_lo_buffer + 1
-			dex
-			stx oam_lo_buffer + 1
-		@up_not_pressed:
-		rts
+.proc handle_input
+    lda JOY1H         ; Read once: BYsSUDLR
+    sta controller    ; Optional: store for later use or debugging
+
+    ; UP (bit 3)
+    bit #%00001000 ; Up - BYsS UDLR
+    beq @not_up
+        dec oam_lo_buffer + 1
+    @not_up:
+
+    ; DOWN (bit 2)
+    bit #%00000100 ; Down - BYsS UDLR
+    beq @not_down
+        inc oam_lo_buffer + 1
+    @not_down:
+
+    ; LEFT (bit 1)
+    bit #%00000010 ; Left - BYsS UDLR
+    beq @not_left
+        dec oam_lo_buffer
+    @not_left:
+
+    ; RIGHT (bit 0)
+    bit #%00000001 ; Right - BYsS UDLR
+    beq @not_right
+        inc oam_lo_buffer
+    @not_right:
+
+
+
+    rts
 .endproc
 
-.proc down_button
-		lda JOY1H ; BYsS UDLR
-		bit #%00000100 ; DOWN button 
-		beq @d_not_pressed
-			; Update sprite 0 Y position
-			ldx oam_lo_buffer + 1
-			inx
-			stx oam_lo_buffer + 1
-		@d_not_pressed:
-		rts
-.endproc
 
-.proc left_button
-		lda JOY1H ; BYsS UDLR
-		bit #%00000010 ; LEFT button 
-		beq @left_not_pressed
-			ldx oam_lo_buffer
-			dex
-			stx oam_lo_buffer
-		@left_not_pressed:
-		rts
-.endproc
-
-.proc right_button
-		lda JOY1H ; BYsS UDLR
-		bit #%00000001 ; RIGHT button 
-		beq @right_not_pressed
-			ldx oam_lo_buffer
-			inx
-			stx oam_lo_buffer
-		@right_not_pressed:
-		rts
-.endproc
 
 nmi:
 	bit RDNMI
