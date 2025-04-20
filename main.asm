@@ -10,6 +10,11 @@
 nmi_count: .res 2
 joy1_lo: .res 1 ; Reserve 1 byte
 joy1_hi: .res 1 ; Reserve 1 byte
+player_x: .res 2
+player_y: .res 2
+player_dx: .res 1   ; Horizontal velocity
+player_dy: .res 1   ; Vertical velocity
+player_on_ground: .res 1
 
 .segment "BSS"
 oam_lo_buffer: .res 512
@@ -166,6 +171,16 @@ start:
 
     obj_0 = $0010 ; Define object one as tile  16
 
+    ; Initialize player position
+    lda #120
+    sta player_x
+    sta player_y
+
+    ; Initialize player velocity
+    lda #0
+    sta player_dx
+    sta player_dy
+
     ; Set sprite 0 X position?
     ldx #120
     stx oam_lo_buffer
@@ -193,10 +208,50 @@ start:
         sta oam_hi_buffer
 
         jsr handle_input   ; Now uses pre-latched controller byte
-        ;jsr update_game    ; Game logic here if needed
+        jsr update_game    ; Game logic here if needed
         jsr draw_sprites   ; Optional, or do DMA to OAM directly here
 
     bra mainloop
+
+.proc update_game
+    ; Apply horizontal velocity
+    lda player_x
+    clc
+    adc player_dx
+    sta player_x
+
+    ; Apply vertical velocity
+    lda player_y
+    clc
+    adc player_dy
+    sta player_y
+
+    ; Apply gravity if not on ground
+    lda player_on_ground
+    bne @no_gravity
+        lda player_dy
+        clc
+        adc #1
+        sta player_dy
+@no_gravity:
+
+    ; Clamp max falling speed (e.g., 6)
+    lda player_dy
+    cmp #6
+    bcc @no_clamp
+        lda #6
+        sta player_dy
+@no_clamp:
+
+    ; Update sprite position from player_x / player_y
+    lda player_x
+    sta oam_lo_buffer     ; X pos
+
+    lda player_y
+    sta oam_lo_buffer + 1 ; Y pos
+
+    rts
+.endproc
 
 .proc draw_sprites
     ; Copy OAM data via DMA
@@ -230,7 +285,13 @@ start:
     ; B Button (bit 7)
     bit #%10000000 ; Up - BYsS UDLR
     beq @not_b
-        ; add stuff later
+        lda player_on_ground
+        beq @no_jump
+            lda $FA
+            sta player_dy
+            lda #0
+            sta player_on_ground
+        @no_jump:
     @not_b:
 
     ; Y Button (bit 6)
@@ -270,8 +331,9 @@ start:
         lda oam_lo_buffer + 3
         ora #%01000000   ; Set H-Flip bit
         sta oam_lo_buffer + 3
-        ; move left
-        dec oam_lo_buffer
+        ; increase velocity to the left
+        ;lda #$FF   ; -1
+        dec player_dx
     @not_left:
 
     ; RIGHT (bit 0)
@@ -281,8 +343,9 @@ start:
         lda oam_lo_buffer + 3
         and #%10111111   ; Clear H-Flip bit
         sta oam_lo_buffer + 3
-        ; move right
-        inc oam_lo_buffer
+        ; increase velocity to the right
+        ;lda #$01   ; +1
+        inc player_dx
     @not_right:
 
     rts
