@@ -8,7 +8,8 @@
 
 .segment "ZEROPAGE"
 nmi_count: .res 2
-controller: .res 1 ; Reserve 1 byte
+joy1_lo: .res 1 ; Reserve 1 byte
+joy1_hi: .res 1 ; Reserve 1 byte
 
 .segment "BSS"
 oam_lo_buffer: .res 512
@@ -169,7 +170,7 @@ start:
 	ldx #120
 	stx oam_lo_buffer
 	; Set sprite 0 Y position
-	ldx #104
+	ldx #120
 	stx oam_lo_buffer + 1
 	; Set sprite 0 to priority 3 and palette to 001
 	ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
@@ -185,49 +186,70 @@ start:
 		cmp nmi_count
 		beq @nmi_check
 
-	    jsr handle_input   ; Now uses pre-latched controller byte
-	    ;jsr update_game    ; Game logic here if needed
-	    ;jsr draw_sprites   ; Optional, or do DMA to OAM directly here
-		; Set sprite 0 X position
-		ldx oam_lo_buffer
-		stx oam_lo_buffer
-		; Set sprite 0 Y position
-		ldx oam_lo_buffer + 1
-		stx oam_lo_buffer + 1
-		; Set sprite 0 to priority 3 and palette to 001
-		ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
-		stx oam_lo_buffer + 2
+
 
 		;lda #%00000000 ; Set sprite 0 to be small (8x8 or 16x16 depending on OBSEL)
 		lda #%00000010 ; Set sprite 0 to be large (16x16 or 32x32 depending on OBSEL)
 		sta oam_hi_buffer
 
-		jsr handle_input
-
-		; Set sprite 0 to priority 3 and palette to 001
-		ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
-		stx oam_lo_buffer + 2
-
-		; Copy OAM data via DMA
-		stz OAMADDL
-		lda #%00000000 ; DIxA APPP https://snes.nesdev.org/wiki/DMA_registers#DMAPn
-		sta DMAP1      ; Write from A to B (D=0), for WRAM (PPP=000), Incrementing A Bus after copy (AA=0)
-		lda #<OAMDATA
-		sta BBAD1
-		ldx #.loword(oam_lo_buffer)
-		stx A1T1L
-		lda #^oam_lo_buffer
-		sta A1B1
-		ldx #(oam_buffer_end - oam_lo_buffer)
-		stx DAS1L
-		lda #%00000010
-		sta MDMAEN
+	    jsr handle_input   ; Now uses pre-latched controller byte
+	    ;jsr update_game    ; Game logic here if needed
+	    jsr draw_sprites   ; Optional, or do DMA to OAM directly here
 
 	bra mainloop
 
+.proc draw_sprites
+	; Copy OAM data via DMA
+	stz OAMADDL
+	
+	lda #%00000000 ; DIxA APPP https://snes.nesdev.org/wiki/DMA_registers#DMAPn
+	sta DMAP1      ; Write from A to B (D=0), for WRAM (PPP=000), Incrementing A Bus after copy (AA=0)
+	
+	lda #<OAMDATA
+	sta BBAD1
+	
+	ldx #.loword(oam_lo_buffer)
+	stx A1T1L
+	
+	lda #^oam_lo_buffer
+	sta A1B1
+	
+	ldx #(oam_buffer_end - oam_lo_buffer)
+	stx DAS1L
+	
+	lda #%00000010
+	sta MDMAEN
+
+	rts
+.endproc
+
 .proc handle_input
     ; Load controller to accumulator
-    lda controller
+    lda joy1_hi
+
+    ; B Button (bit 7)
+    bit #%10000000 ; Up - BYsS UDLR
+    beq @not_b
+        ; add stuff later
+    @not_b:
+
+    ; Y Button (bit 6)
+    bit #%10000000 ; Up - BYsS UDLR
+    beq @not_y
+        ; add stuff later
+    @not_y:
+
+    ; Select Button (bit 5)
+    bit #%10000000 ; Up - BYsS UDLR
+    beq @not_sel
+        ; add stuff later
+    @not_sel:
+
+    ; Start Button (bit 4)
+    bit #%10000000 ; Up - BYsS UDLR
+    beq @not_start
+        ; add stuff later
+    @not_start:
 
     ; UP (bit 3)
     bit #%00001000 ; Up - BYsS UDLR
@@ -245,12 +267,16 @@ start:
     bit #%00000010 ; Left - BYsS UDLR
     beq @not_left
         dec oam_lo_buffer
+        ldx #((%01110010 << 8) | obj_0)
+        stx oam_lo_buffer + 2
     @not_left:
 
     ; RIGHT (bit 0)
     bit #%00000001 ; Right - BYsS UDLR
     beq @not_right
         inc oam_lo_buffer
+        ldx #((%00110010 << 8) | obj_0)
+        stx oam_lo_buffer + 2
     @not_right:
 
     rts
@@ -261,15 +287,17 @@ start:
 nmi:
 	bit RDNMI         ; $4210 - Clear NMI flag
 
-	; Latch controller input
-    lda #%00000001
-    sta $4016
-    stz $4016
+	; Wait for auto-read to finish
+@wait_joy:
+    lda $4212
+    and #$01
+    bne @wait_joy
 
     ; Read controller input
     lda $4218         ; JOY1L - ignored in your case
+    sta joy1_lo
     lda $4219         ; JOY1H - BYsSUDLR
-    sta controller    ; Store for use in main loop
+    sta joy1_hi    ; Store for use in main loop
 
     ; Optional: Copy OAM here (can stay in main loop too if working fine)
 
