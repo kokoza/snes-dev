@@ -266,17 +266,23 @@ start:
     ; LEFT (bit 1)
     bit #%00000010 ; Left - BYsS UDLR
     beq @not_left
+        ; turn left
+        lda oam_lo_buffer + 3
+        ora #%01000000   ; Set H-Flip bit
+        sta oam_lo_buffer + 3
+        ; move left
         dec oam_lo_buffer
-        ldx #((%01110010 << 8) | obj_0)
-        stx oam_lo_buffer + 2
     @not_left:
 
     ; RIGHT (bit 0)
     bit #%00000001 ; Right - BYsS UDLR
     beq @not_right
+        ; turn back right
+        lda oam_lo_buffer + 3
+        and #%10111111   ; Clear H-Flip bit
+        sta oam_lo_buffer + 3
+        ; move right
         inc oam_lo_buffer
-        ldx #((%00110010 << 8) | obj_0)
-        stx oam_lo_buffer + 2
     @not_right:
 
     rts
