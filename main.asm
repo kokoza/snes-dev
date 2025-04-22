@@ -10,6 +10,9 @@
 nmi_count: .res 2
 joy1_lo: .res 1 ; Reserve 1 byte
 joy1_hi: .res 1 ; Reserve 1 byte
+anim_frame: .res 1
+anim_timer: .res 1
+is_moving: .res 1  ; 0 = idle, nonzero = moving
 
 .segment "BSS"
 oam_lo_buffer: .res 512
@@ -164,7 +167,7 @@ start:
     cpx #(oam_buffer_end - oam_lo_buffer)
     bne @zero_oam
 
-    obj_0 = $0010 ; Define object one as tile  16
+    obj_0 = $0012 ; Define object one as tile  16
 
     ; Set sprite 0 X position?
     ldx #120
@@ -175,7 +178,7 @@ start:
     ; Set sprite 0 to priority 3 and palette to 001
     ldx #((%00110010 << 8) | obj_0) ; vhoopppN ppp = Palette of the sprite. The first palette index is 128+ppp*16. oo = Sprite priority.
     stx oam_lo_buffer + 2
-
+    
     lda #%10000001
     sta NMITIMEN    ; $4200
 
@@ -186,17 +189,53 @@ start:
         cmp nmi_count
         beq @nmi_check
 
-
-
         ;lda #%00000000 ; Set sprite 0 to be small (8x8 or 16x16 depending on OBSEL)
         lda #%00000010 ; Set sprite 0 to be large (16x16 or 32x32 depending on OBSEL)
         sta oam_hi_buffer
 
         jsr handle_input   ; Now uses pre-latched controller byte
-        ;jsr update_game    ; Game logic here if needed
+        jsr handle_input   ; Update animation based on movement
         jsr draw_sprites   ; Optional, or do DMA to OAM directly here
 
     bra mainloop
+
+tile_table:
+    .word ((%00110010 << 8) | $10) ; Tile 10
+    .word ((%00110010 << 8) | $12) ; Tile 12
+
+.proc update_game
+    lda anim_timer
+    and #$DD
+    bne @done_anim     ; Only animate every 8 frames
+
+    lda is_moving
+    beq @idle          ; If not moving...
+
+    ; walking animation (toggle between tile 10 and 12)
+    lda anim_frame
+    eor #$01
+    sta anim_frame
+    bra @set_tile
+
+@idle:
+    lda #0             ; For example, idle frame = 0
+    sta anim_frame
+
+@set_tile:
+    lda anim_frame
+    beq @tile_10
+    lda #$12           ; Tile 12
+    bra @apply_tile
+@tile_10:
+    lda #$10           ; Tile 10
+
+@apply_tile:
+    sta oam_lo_buffer + 2
+
+@done_anim:
+    rts
+.endproc
+
 
 .proc draw_sprites
     ; Copy OAM data via DMA
@@ -226,6 +265,9 @@ start:
 .proc handle_input
     ; Load controller to accumulator
     lda joy1_hi
+
+    ; Reset movement indicator
+    stz is_moving
 
     ; B Button (bit 7)
     bit #%10000000 ; Up - BYsS UDLR
@@ -266,6 +308,8 @@ start:
     ; LEFT (bit 1)
     bit #%00000010 ; Left - BYsS UDLR
     beq @not_left
+        ; Set movement indicator to 1
+        inc is_moving
         ; turn left
         lda oam_lo_buffer + 3
         ora #%01000000   ; Set H-Flip bit
@@ -277,6 +321,8 @@ start:
     ; RIGHT (bit 0)
     bit #%00000001 ; Right - BYsS UDLR
     beq @not_right
+        ; Set movement indicator to 1
+        inc is_moving
         ; turn back right
         lda oam_lo_buffer + 3
         and #%10111111   ; Clear H-Flip bit
